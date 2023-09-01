@@ -13,25 +13,26 @@ Globals:
   Api:
     TracingEnabled: true
 Resources:
-  HelloWorldFunction:
+  RestaurantLineBotFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: HelloWorldFunction
-      Handler: hello-world
+      CodeUri: RestaurantLineBotFunction
+      Handler: main
       Runtime: go1.x
-      Architectures:
-      - x86_64
+      Tracing: Active
       Events:
         CatchAll:
           Type: Api
           Properties:
-            Path: /hello
-            Method: GET
+            Path: /restaurant
+            Method: POST
       Environment:
         Variables:
-          PARAM1: VALUE
+          LINE_SECRET_TOKEN: LineSecretToken
+          LINE_ACCESS_TOKEN: LineAccessToken
+          HOTPEPPER_API_KEY: HotpepperApiKey
     Metadata:
-      SamResourceId: HelloWorldFunction
+      SamResourceId: RestaurantLineBotFunction
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
