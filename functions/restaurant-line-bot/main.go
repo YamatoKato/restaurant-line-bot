@@ -20,7 +20,8 @@ import (
 )
 
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	fmt.Println(event.Body, "event.Body")
+
+	fmt.Println(event, "event")
 	// BOTを初期化
 	bot, err := linebot.New(
 		os.Getenv("LINE_SECRET_TOKEN"),
@@ -34,7 +35,11 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	if !validateSignature(os.Getenv("LINE_SECRET_TOKEN"), event.Headers["X-Line-Signature"], []byte(event.Body)) {
+	signature := event.Headers["x-line-signature"]
+	if signature == "" {
+		signature = event.Headers["X-Line-Signature"]
+	}
+	if !validateSignature(os.Getenv("LINE_SECRET_TOKEN"), signature, []byte(event.Body)) {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       fmt.Sprintf(`{"message":"%s"}`+"\n", linebot.ErrInvalidSignature.Error()),
