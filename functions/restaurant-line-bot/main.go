@@ -34,7 +34,7 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		}, nil
 	}
 
-	if !validateSignature(os.Getenv("LINE_CHANNEL_SECRET"), event.Headers["X-Line-Signature"], []byte(event.Body)) {
+	if !validateSignature(os.Getenv("LINE_SECRET_TOKEN"), event.Headers["X-Line-Signature"], []byte(event.Body)) {
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusBadRequest,
 			Body:       fmt.Sprintf(`{"message":"%s"}`+"\n", linebot.ErrInvalidSignature.Error()),
@@ -61,12 +61,14 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 func validateSignature(channelSecret string, signature string, body []byte) bool {
 	decoded, err := base64.StdEncoding.DecodeString(signature)
 	if err != nil {
+		fmt.Println(err, "validateSignature_base64.StdEncoding.DecodeString")
 		return false
 	}
 
 	hash := hmac.New(sha256.New, []byte(channelSecret))
 	_, err = hash.Write(body)
 	if err != nil {
+		fmt.Println(err, "validateSignature_hash.Write")
 		return false
 	}
 
