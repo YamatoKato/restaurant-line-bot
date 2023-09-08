@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,11 +19,6 @@ import (
 	"restaurant-line-bot/functions/restaurant-line-bot/usecase"
 )
 
-type Webhook struct {
-	Destination string           `json:"destination"`
-	Events      []*linebot.Event `json:"events"`
-}
-
 func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println(event.Body, "event.Body")
 	// BOTを初期化
@@ -33,6 +31,13 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       fmt.Sprintf(`{"message":"%s"}`+"\n", http.StatusText(http.StatusInternalServerError)),
+		}, nil
+	}
+
+	if !validateSignature(os.Getenv("LINE_CHANNEL_SECRET"), event.Headers["X-Line-Signature"], []byte(event.Body)) {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       fmt.Sprintf(`{"message":"%s"}`+"\n", linebot.ErrInvalidSignature.Error()),
 		}, nil
 	}
 
@@ -51,6 +56,21 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	return events.APIGatewayProxyResponse{
 		StatusCode: 200,
 	}, nil
+}
+
+func validateSignature(channelSecret string, signature string, body []byte) bool {
+	decoded, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		return false
+	}
+
+	hash := hmac.New(sha256.New, []byte(channelSecret))
+	_, err = hash.Write(body)
+	if err != nil {
+		return false
+	}
+
+	return hmac.Equal(decoded, hash.Sum(nil))
 }
 
 func main() {
