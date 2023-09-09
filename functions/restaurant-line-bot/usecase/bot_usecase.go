@@ -2,15 +2,16 @@ package usecase
 
 import (
 	"fmt"
+	"net/url"
 	"restaurant-line-bot/functions/restaurant-line-bot/model"
 	"restaurant-line-bot/functions/restaurant-line-bot/repository"
-	"unicode/utf8"
+	"restaurant-line-bot/functions/restaurant-line-bot/utils"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
 type IBotUsecase interface {
-	GetRestaurantInfos(area model.Area) ([]*linebot.CarouselColumn, error)
+	GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error)
 }
 
 type botUsecase struct {
@@ -21,7 +22,7 @@ func NewBotUsecase(hr repository.IHotpepperRepository) IBotUsecase {
 	return &botUsecase{hr}
 }
 
-func (bu *botUsecase) GetRestaurantInfos(area model.Area) ([]*linebot.CarouselColumn, error) {
+func (bu *botUsecase) GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error) {
 	response := model.HotpepperResponse{}
 	var ccs []*linebot.CarouselColumn
 
@@ -32,18 +33,22 @@ func (bu *botUsecase) GetRestaurantInfos(area model.Area) ([]*linebot.CarouselCo
 	for _, shop := range response.Results.Shop {
 		addr := shop.Address
 		// 61文字以上ある場合はそれ以降をカット
-		if 60 < utf8.RuneCountInString(addr) {
-			addr = string([]rune(addr)[:60])
-		}
+		addr = utils.CutString(addr, 61)
 
 		cc := linebot.NewCarouselColumn(
 			shop.Photo.Mobile.L,
 			shop.Name,
 			addr,
 			linebot.NewURIAction("ホットペッパーで開く", shop.URLS.PC),
+			linebot.NewURIAction("GoogleMapで開く", "https://www.google.com/maps/search/?api=1&query="+url.QueryEscape(utils.RemoveSpaces(shop.Name)+" "+utils.RemoveSpaces(shop.Address))),
 		).WithImageOptions("#FFFFFF")
 		ccs = append(ccs, cc)
 	}
-	return ccs, nil
+
+	res := linebot.NewTemplateMessage(
+		"レストラン一覧",
+		linebot.NewCarouselTemplate(ccs...).WithImageOptions("rectangle", "cover"),
+	)
+	return res, nil
 
 }

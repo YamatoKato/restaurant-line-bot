@@ -1,141 +1,62 @@
-# restaurant-line-bot
+# アプリケーション概要
 
-This is a sample template for restaurant-line-bot - Below is a brief explanation of what we have generated for you:
+このアプリケーションは、LINE Messaging API を活用したレストラン検索チャットボットです。ユーザーは LINE アプリを通じて、レストラン情報を検索し、詳細を表示することができます。
 
-```bash
-.
-├── Makefile                    <-- Make to automate build
-├── README.md                   <-- This instructions file
-├── hello-world                 <-- Source code for a lambda function
-│   ├── main.go                 <-- Lambda function code
-│   └── main_test.go            <-- Unit tests
-└── template.yaml
-```
+## 主要コンポーネント
 
-## Requirements
+### LINE Messaging API
 
-* AWS CLI already configured with Administrator permission
-* [Docker installed](https://www.docker.com/community-edition)
-* [Golang](https://golang.org)
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+LINE Messaging API は、LINE プラットフォーム上でユーザーとのコミュニケーションを実現するための API です。このアプリケーションでは、LINE ユーザーからのメッセージを受信し、応答メッセージを生成するために使用されています。
 
-## Setup process
+### AWS SAM (Serverless Application Model)
 
-### Installing dependencies & building the target 
+AWS SAM を使用して APIGateway,Lambda 関数のデプロイと設定を管理しています。
 
-In this example we use the built-in `sam build` to automatically download all the dependencies and package our build target.   
-Read more about [SAM Build here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-build.html) 
+### HotpepperAPI
 
-The `sam build` command is wrapped inside of the `Makefile`. To execute this simply run
- 
-```shell
-make
-```
+レストラン情報を提供する外部 API です。このアプリケーションでは、ユーザーからの検索要求に応じて HotpepperAPI にクエリを送信し、レストラン情報を取得します。
 
-### Local development
+## 動作フロー
 
-**Invoking function locally through local API Gateway**
+1. ユーザーは LINE アプリを通じて、チャットボットにメッセージを送信します。
+2. LINE Messaging API はユーザーのメッセージを受信し、AWS API Gateway を介して Lambda 関数に転送します。
+3. Lambda 関数はユーザーの検索要求を処理し、HotpepperAPI に対するクエリを生成します。
+4. HotpepperAPI からのレストラン情報を受け取り、ユーザーに返信メッセージを生成します。
+5. 返信メッセージは LINE Messaging API を介してユーザーに送信され、チャットボットの応答が表示されます。
 
-```bash
-sam local start-api
-```
+このアプリケーションは、LINE プラットフォームと AWS サーバーレステクノロジーを組み合わせて、レストラン検索の簡単で迅速な方法を提供します。
 
-If the previous command ran successfully you should now be able to hit the following local endpoint to invoke your function `http://localhost:3000/hello`
+# アーキテクチャ
 
-**SAM CLI** is used to emulate both Lambda and API Gateway locally and uses our `template.yaml` to understand how to bootstrap this environment (runtime, where the source code is, etc.) - The following excerpt is what the CLI will read in order to initialize an API and its routes:
+main.go->controller.go->usecase.go->repository.go
 
-```yaml
-...
-Events:
-    HelloWorld:
-        Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-        Properties:
-            Path: /hello
-            Method: get
-```
+※エンドポイントが単一のため、router は不要と判断。
 
-## Packaging and deployment
+## main.go
 
-AWS Lambda Golang runtime requires a flat folder with the executable generated on build step. SAM will use `CodeUri` property to know where to look up for the application:
+- lambda の`/restaurant＠POST`リクエストを受け取る。
+- line-bot-sdk の初期化
+- DI
+- 署名の検証
+- `@return` リクエストのレスポンス内容を返す
 
-```yaml
-...
-    FirstFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: hello_world/
-            ...
-```
+## controller.go
 
-To deploy your application for the first time, run the following in your shell:
+- リクエストから Webhook イベントを取得
+- Webhook イベントを解析し、適切な usecase.go をトリガー
+- line-bot-sdk によって LINEMessagingAPI の各種エンドポイントをトリガー
+- `@return` 上記処理のエラー
 
-```bash
-sam deploy --guided
-```
+## usecase.go
 
-The command will package and deploy your application to AWS, with a series of prompts:
+- repository.go にて取得したデータを line-bot-sdk の各種構造体に加工。
+- `@return` line-bot-sdk の各種構造体
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+## repository.go
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+- 今回は、HotpepperAPI を永続化されたデータとして扱い、API を利用してデータを取得する
+- `@return` 取得したデータを返す
 
-### Testing
+## model.go
 
-We use `testing` package that is built-in in Golang and you can simply run the following command to run our tests:
-
-```shell
-cd ./hello-world/
-go test -v .
-```
-# Appendix
-
-### Golang installation
-
-Please ensure Go 1.x (where 'x' is the latest version) is installed as per the instructions on the official golang website: https://golang.org/doc/install
-
-A quickstart way would be to use Homebrew, chocolatey or your linux package manager.
-
-#### Homebrew (Mac)
-
-Issue the following command from the terminal:
-
-```shell
-brew install golang
-```
-
-If it's already installed, run the following command to ensure it's the latest version:
-
-```shell
-brew update
-brew upgrade golang
-```
-
-#### Chocolatey (Windows)
-
-Issue the following command from the powershell:
-
-```shell
-choco install golang
-```
-
-If it's already installed, run the following command to ensure it's the latest version:
-
-```shell
-choco upgrade golang
-```
-
-## Bringing to the next level
-
-Here are a few ideas that you can use to get more acquainted as to how this overall process works:
-
-* Create an additional API resource (e.g. /hello/{proxy+}) and return the name requested through this new path
-* Update unit test to capture that
-* Package & Deploy
-
-Next, you can use the following resources to know more about beyond hello world samples and how others structure their Serverless applications:
-
-* [AWS Serverless Application Repository](https://aws.amazon.com/serverless/serverlessrepo/)
+- 各階層で利用されるデータ構造モデルを定義
