@@ -10,24 +10,25 @@ import (
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-type IBotUsecase interface {
+type IUsecase interface {
 	GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error)
+	SetAreaMenuQuickReply() (linebot.SendingMessage, error)
 }
 
-type botUsecase struct {
+type usecase struct {
 	hr repository.IHotpepperRepository
 }
 
-func NewBotUsecase(hr repository.IHotpepperRepository) IBotUsecase {
-	return &botUsecase{hr}
+func NewUsecase(hr repository.IHotpepperRepository) IUsecase {
+	return &usecase{hr}
 }
 
-func (bu *botUsecase) GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error) {
+func (u *usecase) GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error) {
 	response := model.HotpepperResponse{}
 	var ccs []*linebot.CarouselColumn
 
-	if err := bu.hr.GetRestaurantInfos(&response, &area); err != nil {
-		fmt.Println(err, "bot_usecase@GetRestaurantInfos-bu.hr.GetRestaurantInfos")
+	if err := u.hr.GetRestaurantInfos(&response, &area); err != nil {
+		fmt.Println(err, "usecase@GetRestaurantInfos-bu.hr.GetRestaurantInfos")
 		return nil, err
 	}
 	for _, shop := range response.Results.Shop {
@@ -50,5 +51,19 @@ func (bu *botUsecase) GetRestaurantInfos(area model.Area) (*linebot.TemplateMess
 		linebot.NewCarouselTemplate(ccs...).WithImageOptions("rectangle", "cover"),
 	)
 	return res, nil
+}
 
+func (u *usecase) SetAreaMenuQuickReply() (linebot.SendingMessage, error) {
+	qr := linebot.NewQuickReplyItems(
+		linebot.NewQuickReplyButton(
+			"",
+			linebot.NewLocationAction("現在の位置情報を送る"),
+		),
+		linebot.NewQuickReplyButton(
+			"",
+			linebot.NewPostbackAction("エリアを入力", "input_area", "", "", "openKeyboard", "---\n都道府県: 東京\n地区: 渋谷\n---"),
+		),
+	)
+	res := linebot.NewTextMessage("メニュー").WithQuickReplies(qr)
+	return res, nil
 }
