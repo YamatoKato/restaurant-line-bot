@@ -8,7 +8,7 @@ import (
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-func GetRestaurantInfos(c *Controller, e *linebot.Event, bot *linebot.Client) error {
+func getRestaurantInfos(c *Controller, e *linebot.Event, bot *linebot.Client) error {
 	msg := e.Message.(*linebot.LocationMessage)
 
 	lat := strconv.FormatFloat(msg.Latitude, 'f', 2, 64)

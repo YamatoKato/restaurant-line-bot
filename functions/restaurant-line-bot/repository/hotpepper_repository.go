@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	API_URL_BY_AREA = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s"
+	AREA_SEARCH_API_URL           = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s"
+	GENRE_AND_AREA_SEARCH_API_URL = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s&genre=%s"
+	PET_AND_AREA_SEARCH_API_URL   = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s&pet=1"
 )
 
 type IHotpepperRepository interface {
@@ -25,7 +27,7 @@ func NewHotpepperRepository() IHotpepperRepository {
 }
 
 func (r *hotpepperRepository) GetRestaurantInfos(response *model.HotpepperResponse, area *model.Area) error {
-	url := fmt.Sprintf(API_URL_BY_AREA, os.Getenv("HOTPEPPER_API_KEY"), area.Latitude, area.Longitude)
+	url := fmt.Sprintf(AREA_SEARCH_API_URL, os.Getenv("HOTPEPPER_API_KEY"), area.Latitude, area.Longitude)
 
 	resp, err := http.Get(url)
 	if err != nil {

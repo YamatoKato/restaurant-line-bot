@@ -11,16 +11,20 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
+const (
+	INTRO_MESSAGE = "お店を探す"
+)
+
 type IController interface {
 	HandleRequest(event events.APIGatewayProxyRequest, bot *linebot.Client) error
 }
 
 type Controller struct {
-	bu usecase.IBotUsecase
+	u usecase.IUsecase
 }
 
-func NewController(bu usecase.IBotUsecase) IController {
-	return &Controller{bu}
+func NewController(u usecase.IUsecase) IController {
+	return &Controller{u}
 }
 
 func (c *Controller) HandleRequest(event events.APIGatewayProxyRequest, bot *linebot.Client) error {
@@ -41,18 +45,25 @@ func (c *Controller) HandleRequest(event events.APIGatewayProxyRequest, bot *lin
 
 			// メッセージがテキスト形式の場合
 			case *linebot.TextMessage:
-				replyMessage := message.Text
-				if _, err := bot.ReplyMessage(we.ReplyToken, linebot.NewTextMessage(replyMessage)).Do(); err != nil {
-					fmt.Println(err, "controller@HandleRequest_bot.ReplyMessage")
-					return err
-				}
-				// メッセージが位置情報の場合
+				userMessage := message.Text
 
+				if userMessage == INTRO_MESSAGE {
+					if err := setAreaMenu(c, we, bot); err != nil {
+						fmt.Println(err, "controller@setAreaMenu")
+						return err
+					}
+					return nil
+				} else {
+					//指定テキスト以外の場合
+					return nil
+				}
+			// メッセージが位置情報の場合
 			case *linebot.LocationMessage:
-				if err := GetRestaurantInfos(c, we, bot); err != nil {
+				if err := getRestaurantInfos(c, we, bot); err != nil {
 					fmt.Println(err, "controller@getRestaurantInfos")
 					return err
 				}
+				return nil
 			}
 		}
 	}

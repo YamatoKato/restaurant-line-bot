@@ -12,7 +12,7 @@ import (
 
 type IUsecase interface {
 	GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage, error)
-	SetAreaMenuQuickReply() (linebot.SendingMessage, error)
+	SetAreaMenu() (*linebot.TemplateMessage, error)
 }
 
 type usecase struct {
@@ -53,17 +53,14 @@ func (u *usecase) GetRestaurantInfos(area model.Area) (*linebot.TemplateMessage,
 	return res, nil
 }
 
-func (u *usecase) SetAreaMenuQuickReply() (linebot.SendingMessage, error) {
-	qr := linebot.NewQuickReplyItems(
-		linebot.NewQuickReplyButton(
-			"",
-			linebot.NewLocationAction("現在の位置情報を送る"),
-		),
-		linebot.NewQuickReplyButton(
-			"",
-			linebot.NewPostbackAction("エリアを入力", "input_area", "", "", "openKeyboard", "---\n都道府県: 東京\n地区: 渋谷\n---"),
-		),
+func (u *usecase) SetAreaMenu() (*linebot.TemplateMessage, error) {
+	bt := linebot.NewButtonsTemplate(
+		"https://cdn.pixabay.com/photo/2017/08/17/07/47/travel-2650303_1280.jpg",
+		"１/２　検索エリアを指定",
+		"指定エリアまたは位置情報を送信し、その中心から検索します\n※エリアを指定する場合「---」を消さずに入力してください",
+		linebot.NewPostbackAction("エリアを指定する", "input_area", "", "", "openKeyboard", "---\n都道府県: 東京\n地区: 渋谷\n---"),
+		linebot.NewURIAction("位置情報を送る", "https://line.me/R/nv/location/"),
 	)
-	res := linebot.NewTextMessage("メニュー").WithQuickReplies(qr)
-	return res, nil
+	tm := linebot.NewTemplateMessage("エリアを選択してください", bt)
+	return tm, nil
 }
