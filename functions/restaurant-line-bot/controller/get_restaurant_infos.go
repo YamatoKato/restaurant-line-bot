@@ -19,7 +19,7 @@ func GetRestaurantInfos(c *Controller, e *linebot.Event, bot *linebot.Client) er
 		Longitude: lng,
 	}
 
-	res, err := c.bu.GetRestaurantInfos(area)
+	res, err := c.u.GetRestaurantInfos(area)
 	if err != nil {
 		fmt.Println(err, "controller@getRestaurantInfos_bc.bu.GetRestaurantInfos")
 		return err
