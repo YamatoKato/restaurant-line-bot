@@ -47,10 +47,10 @@ func HandleRequest(ctx context.Context, event events.APIGatewayProxyRequest) (ev
 	}
 
 	hotpepperRepository := repository.NewHotpepperRepository()
-	botUsecase := usecase.NewBotUsecase(hotpepperRepository)
-	botController := controller.NewController(botUsecase)
+	usecase := usecase.NewUsecase(hotpepperRepository)
+	controller := controller.NewController(usecase)
 
-	if err := botController.HandleRequest(event, bot); err != nil {
+	if err := controller.HandleRequest(event, bot); err != nil {
 		fmt.Println(err, "main.botController.HandleRequest")
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
