@@ -5,18 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"restaurant-line-bot/functions/restaurant-line-bot/model"
-)
-
-const (
-	AREA_SEARCH_API_URL           = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s"
-	GENRE_AND_AREA_SEARCH_API_URL = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s&genre=%s"
-	PET_AND_AREA_SEARCH_API_URL   = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?format=json&key=%s&lat=%s&lng=%s&pet=1"
+	"restaurant-line-bot/functions/restaurant-line-bot/utils"
 )
 
 type IHotpepperRepository interface {
-	GetRestaurantInfos(response *model.HotpepperResponse, area *model.Area) error
+	GetRestaurantInfos(response *model.HotpepperResponse, apiParams *model.APIParams) error
 }
 
 type hotpepperRepository struct {
@@ -26,8 +20,8 @@ func NewHotpepperRepository() IHotpepperRepository {
 	return &hotpepperRepository{}
 }
 
-func (r *hotpepperRepository) GetRestaurantInfos(response *model.HotpepperResponse, area *model.Area) error {
-	url := fmt.Sprintf(AREA_SEARCH_API_URL, os.Getenv("HOTPEPPER_API_KEY"), area.Latitude, area.Longitude)
+func (r *hotpepperRepository) GetRestaurantInfos(response *model.HotpepperResponse, apiParams *model.APIParams) error {
+	url := utils.BuildAPIURL(apiParams)
 
 	resp, err := http.Get(url)
 	if err != nil {

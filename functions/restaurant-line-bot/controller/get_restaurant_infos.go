@@ -14,12 +14,12 @@ func getRestaurantInfos(c *Controller, e *linebot.Event, bot *linebot.Client) er
 	lat := strconv.FormatFloat(msg.Latitude, 'f', 2, 64)
 	lng := strconv.FormatFloat(msg.Longitude, 'f', 2, 64)
 
-	area := model.Area{
-		Latitude:  lat,
-		Longitude: lng,
+	apiParams := &model.APIParams{
+		Lat: lat,
+		Lng: lng,
 	}
 
-	res, err := c.u.GetRestaurantInfos(area)
+	res, err := c.u.GetRestaurantInfos(apiParams)
 	if err != nil {
 		fmt.Println(err, "controller@getRestaurantInfos_bc.bu.GetRestaurantInfos")
 		return err

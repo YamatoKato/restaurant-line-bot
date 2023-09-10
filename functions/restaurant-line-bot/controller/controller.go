@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"restaurant-line-bot/functions/restaurant-line-bot/model"
 	"restaurant-line-bot/functions/restaurant-line-bot/usecase"
+	"restaurant-line-bot/functions/restaurant-line-bot/utils"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 
 	"github.com/aws/aws-lambda-go/events"
-)
-
-const (
-	INTRO_MESSAGE = "お店を探す"
 )
 
 type IController interface {
@@ -47,22 +44,30 @@ func (c *Controller) HandleRequest(event events.APIGatewayProxyRequest, bot *lin
 			case *linebot.TextMessage:
 				userMessage := message.Text
 
-				if userMessage == INTRO_MESSAGE {
+				if userMessage == model.INTRO_MESSAGE {
 					if err := setAreaMenu(c, we, bot); err != nil {
 						fmt.Println(err, "controller@setAreaMenu")
 						return err
 					}
 					return nil
-				} else {
-					//指定テキスト以外の場合
+				} else if utils.ContainsHyphen(userMessage) {
+					// エリア指定の場合
+					if err := setGenreMenu(c, we, bot, userMessage); err != nil {
+						fmt.Println(err, "controller@setGenreMenu")
+						return err
+					}
 					return nil
 				}
 			// メッセージが位置情報の場合
 			case *linebot.LocationMessage:
-				if err := getRestaurantInfos(c, we, bot); err != nil {
-					fmt.Println(err, "controller@getRestaurantInfos")
+				if err := setGenreMenu(c, we, bot, ""); err != nil {
+					fmt.Println(err, "controller@*linebot.LocationMessage_setGenreMenu")
 					return err
 				}
+				// if err := getRestaurantInfos(c, we, bot); err != nil {
+				// 	fmt.Println(err, "controller@getRestaurantInfos")
+				// 	return err
+				// }
 				return nil
 			}
 		}
