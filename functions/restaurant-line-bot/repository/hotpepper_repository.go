@@ -10,7 +10,7 @@ import (
 )
 
 type IHotpepperRepository interface {
-	GetRestaurantInfos(response *model.HotpepperResponse, apiParams *model.APIParams) error
+	GetRestaurantInfos(response *model.HotpepperResponse, apiParams model.PostbackData) error
 }
 
 type hotpepperRepository struct {
@@ -20,7 +20,7 @@ func NewHotpepperRepository() IHotpepperRepository {
 	return &hotpepperRepository{}
 }
 
-func (r *hotpepperRepository) GetRestaurantInfos(response *model.HotpepperResponse, apiParams *model.APIParams) error {
+func (r *hotpepperRepository) GetRestaurantInfos(response *model.HotpepperResponse, apiParams model.PostbackData) error {
 	url := utils.BuildAPIURL(apiParams)
 
 	resp, err := http.Get(url)

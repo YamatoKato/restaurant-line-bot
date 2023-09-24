@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/url"
+	"os"
 	"regexp"
 	"restaurant-line-bot/functions/restaurant-line-bot/model"
 	"strings"
@@ -15,12 +16,19 @@ func RemoveSpaces(input string) string {
 	return re.ReplaceAllString(input, "")
 }
 
-// 指定文字数以上ある場合はそれ以降をカット
-func CutString(input string, num int64) string {
-	if 60 < utf8.RuneCountInString(input) {
-		input = string([]rune(input)[:num])
+// 指定文字数以上ある場合はそれ以降をカットし、「...」をつける
+func CutString(text string, limit int) string {
+	// 文字数を数える
+	length := utf8.RuneCountInString(text)
+
+	// 制限文字数以下ならそのまま返す
+	if length <= limit {
+		return text
 	}
-	return input
+
+	// 制限文字数までカットして「...」を追加
+	runes := []rune(text)
+	return string(runes[:limit-3]) + "..."
 }
 
 // 正規表現を使用して「---」で囲まれたテキストを抽出
@@ -46,11 +54,11 @@ func ContainsHyphen(input string) bool {
 }
 
 // APIのURLを構築する関数
-func BuildAPIURL(apiParams *model.APIParams) string {
+func BuildAPIURL(apiParams model.PostbackData) string {
 	// URLパラメーターを設定
 	params := url.Values{}
 	params.Add("format", "json")
-	params.Add("key", apiParams.APIKey)
+	params.Add("key", os.Getenv("HOTPEPPER_API_KEY"))
 
 	if apiParams.Lat != "" {
 		params.Add("lat", apiParams.Lat)
@@ -60,8 +68,8 @@ func BuildAPIURL(apiParams *model.APIParams) string {
 		params.Add("lng", apiParams.Lng)
 	}
 
-	if apiParams.Genre != "" {
-		params.Add("genre", apiParams.Genre)
+	if apiParams.GenreCode != "" {
+		params.Add("genre", apiParams.GenreCode)
 	}
 
 	if apiParams.Keyword != "" {
@@ -73,16 +81,13 @@ func BuildAPIURL(apiParams *model.APIParams) string {
 	return apiURL
 }
 
-func CreatePostBackData(apiParams *model.APIParams, genreCode string) string {
-	postBackData := ""
-
-	if apiParams.Keyword != "" {
-		postBackData = fmt.Sprintf("area=%s&lat=nil&lng=nil&genreCode=%s", apiParams.Keyword, genreCode)
-	} else {
-		postBackData = fmt.Sprintf("area=nil&lat=%s&lng=%s&genreCode=%s", apiParams.Lat, apiParams.Lng, genreCode)
+func CreatePostbackData(postbackData *model.PostbackData) (string, error) {
+	jsonData, err := json.Marshal(postbackData)
+	if err != nil {
+		return "", err
 	}
 
-	return postBackData
+	return string(jsonData), nil
 }
 
 func GetAreaStrFromLocation(input string) string {
@@ -110,58 +115,82 @@ func GetAreaStrFromLocation(input string) string {
 	return ""
 }
 
-func SearchGenreNameByCode(genreCode string) string {
-	switch genreCode {
-	case model.GENRE_JAPANESE_CODE:
-		return model.GENRE_JAPANESE_JP
-	case model.GENRE_WESTERN_CODE:
-		return model.GENRE_WESTERN_JP
-	case model.GENRE_CHINESE_CODE:
-		return model.GENRE_CHINESE_JP
-	case model.GENRE_ITALIAN_FRENCH_CODE:
-		return model.GENRE_ITALIAN_FRENCH_JP
-	case model.GENRE_KOREAN_CODE:
-		return model.GENRE_KOREAN_JP
-	case model.GENRE_RAMEN_CODE:
-		return model.GENRE_RAMEN_JP
-	case model.GENRE_YAKINIKU_OFFAL_CODE:
-		return model.GENRE_YAKINIKU_OFFAL_JP
-	case model.GENRE_CAFE_SWEETS_CODE:
-		return model.GENRE_CAFE_SWEETS_JP
-	case model.GENRE_IZAKAYA_CODE:
-		return model.GENRE_IZAKAYA_JP
-	case model.GENRE_ROULETTE_CODE:
-		return model.GENRE_ROULETTE_JP
-	// 他のジャンルに対する定義を追加
-	default:
-		return ""
+func CreateTextMessage(data model.PostbackData) string {
+	baseStr := ""
+	conditionStr := "\n\n追加した条件：\n"
+
+	if data.AreaStr != "" {
+		baseStr += "エリア：" + data.AreaStr + "\n"
 	}
+	if data.GenreCode != "" {
+		baseStr += "ジャンル：" + model.SearchGenreNameByCode(data.GenreCode) + "\n"
+	}
+	if data.Keyword != "" {
+		conditionStr += "キーワード：" + data.Keyword + "\n"
+	}
+	if data.Smoking != "" {
+		conditionStr += "■" + " " + model.SMOKING_JP + "\n"
+	}
+	if data.Parking != "" {
+		conditionStr += "■" + " " + model.PARKING_JP + "\n"
+	}
+	if data.PetFriendly != "" {
+		conditionStr += "■" + " " + model.PET_FRIENDLY_JP + "\n"
+	}
+	if data.MidnightOpen != "" {
+		conditionStr += "■" + " " + model.MIDNIGHT_OPEN_JP + "\n"
+	}
+	if data.MidnightMeal != "" {
+		conditionStr += "■" + " " + model.MIDNIGHT_MEAL_JP + "\n"
+	}
+	if data.PrivateRoom != "" {
+		conditionStr += "■" + " " + model.PRIVATE_ROOM_JP + "\n"
+	}
+	if data.Terrace != "" {
+		conditionStr += "■" + " " + model.TERRACE_JP + "\n"
+	}
+	if data.FreeDrink != "" {
+		conditionStr += "■" + " " + model.FREE_DRINK_JP + "\n"
+	}
+	if data.FreeFood != "" {
+		conditionStr += "■" + " " + model.FREE_FOOD_JP + "\n"
+	}
+
+	return baseStr + conditionStr
 }
 
-func SearchGenreImgUrlByCode(genreCode string) string {
-	switch genreCode {
-	case model.GENRE_JAPANESE_CODE:
-		return model.GENRE_JAPANESE_IMG_URL
-	case model.GENRE_WESTERN_CODE:
-		return model.GENRE_WESTERN_IMG_URL
-	case model.GENRE_CHINESE_CODE:
-		return model.GENRE_CHINESE_IMG_URL
-	case model.GENRE_ITALIAN_FRENCH_CODE:
-		return model.GENRE_ITALIAN_FRENCH_IMG_URL
-	case model.GENRE_KOREAN_CODE:
-		return model.GENRE_KOREAN_IMG_URL
-	case model.GENRE_RAMEN_CODE:
-		return model.GENRE_RAMEN_IMG_URL
-	case model.GENRE_YAKINIKU_OFFAL_CODE:
-		return model.GENRE_YAKINIKU_OFFAL_IMG_URL
-	case model.GENRE_CAFE_SWEETS_CODE:
-		return model.GENRE_CAFE_SWEETS_IMG_URL
-	case model.GENRE_IZAKAYA_CODE:
-		return model.GENRE_IZAKAYA_IMG_URL
-	// 他のジャンルに対する定義を追加
-	case model.GENRE_ROULETTE_CODE:
-		return model.GENRE_ROULETTE_IMG_URL
-	default:
+func GetPrefix(input string) string {
+	if len(input) > 0 {
+		switch input[0] {
+		case 'A':
+			return model.PBD_PREFIX_IDENTIFY_AREA
+		case 'G':
+			return model.PBD_PREFIX_IDENTIFY_GENRE
+		case 'C':
+			return model.PBD_PREFIX_IDENTIFY_CONDITION
+		case 'K':
+			return model.PBD_PREFIX_IDENTIFY_KEYWORD
+		case 'B':
+			return model.PBD_PREFIX_IDENTIFY_BUDGET
+		case 'S':
+			return model.PBD_PREFIX_IDENTIFY_SEARCH
+		case 'F':
+			return model.PBD_PREFIX_IDENTIFY_CONFIRM
+		default:
+			return ""
+		}
+	}
+	return ""
+}
+
+func RemoveFirstTwoCharacters(input string) string {
+	// 文字列が2文字未満の場合は空文字列を返す
+	if len(input) < 2 {
 		return ""
 	}
+
+	// 先頭の2文字を削除して新しい文字列を作成する
+	result := input[2:]
+
+	return result
 }

@@ -9,11 +9,11 @@ import (
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
-func (u *usecase) GetRestaurantInfos(apiParams *model.APIParams) (*linebot.TemplateMessage, error) {
+func (u *usecase) GetRestaurantInfos(postbackData model.PostbackData) (*linebot.TemplateMessage, error) {
 	response := model.HotpepperResponse{}
 	var ccs []*linebot.CarouselColumn
 
-	if err := u.hr.GetRestaurantInfos(&response, apiParams); err != nil {
+	if err := u.hr.GetRestaurantInfos(&response, postbackData); err != nil {
 		fmt.Println(err, "usecase@GetRestaurantInfos-bu.hr.GetRestaurantInfos")
 		return nil, err
 	}
@@ -28,7 +28,6 @@ func (u *usecase) GetRestaurantInfos(apiParams *model.APIParams) (*linebot.Templ
 			addr,
 			linebot.NewURIAction("ホットペッパーで開く", shop.URLS.PC),
 			linebot.NewURIAction("GoogleMapで開く", "https://www.google.com/maps/search/?api=1&query="+url.QueryEscape(utils.RemoveSpaces(shop.Name)+" "+utils.RemoveSpaces(shop.Address))),
-			linebot.NewPostbackAction("詳細を表示", utils.CreatePostBackData(apiParams, shop.Name), "", "", "", ""),
 		).WithImageOptions("#FFFFFF")
 		ccs = append(ccs, cc)
 	}

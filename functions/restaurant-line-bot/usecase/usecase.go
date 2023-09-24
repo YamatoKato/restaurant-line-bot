@@ -8,9 +8,11 @@ import (
 )
 
 type IUsecase interface {
-	GetRestaurantInfos(apiParams *model.APIParams) (*linebot.TemplateMessage, error)
+	GetRestaurantInfos(apiParams model.PostbackData) (*linebot.TemplateMessage, error)
+	SetConfirmMenu(postbackData *model.PostbackData, messageType string) (*linebot.TemplateMessage, error)
 	SetAreaMenu() (*linebot.TemplateMessage, error)
-	SetGenreMenu(apiParams *model.APIParams) (*linebot.TemplateMessage, error)
+	SetGenreMenu(apiParams *model.PostbackData) ([]linebot.SendingMessage, error)
+	SetConditionMenu(apiParams *model.PostbackData) ([]linebot.SendingMessage, error)
 }
 
 type usecase struct {
