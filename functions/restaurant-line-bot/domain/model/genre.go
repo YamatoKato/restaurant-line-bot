@@ -14,6 +14,20 @@ func CreateGenre(code, name, imgURL string) Genre {
 	}
 }
 
+type GenreInfo struct {
+	Genre              Genre
+	PostbackActionData PostbackActionData
+	CarouselColumnData CarouselColumnData
+}
+
+func CreateGenreInfo(genre Genre, postbackActionData PostbackActionData, carouselColumnData CarouselColumnData) GenreInfo {
+	return GenreInfo{
+		Genre:              genre,
+		PostbackActionData: postbackActionData,
+		CarouselColumnData: carouselColumnData,
+	}
+}
+
 func SearchGenreNameByCode(genreCode string) string {
 	switch genreCode {
 	case GENRE_JAPANESE_CODE:

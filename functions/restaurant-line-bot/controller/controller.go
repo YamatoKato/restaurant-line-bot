@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"restaurant-line-bot/functions/restaurant-line-bot/model"
+	"restaurant-line-bot/functions/restaurant-line-bot/domain/model"
 	"restaurant-line-bot/functions/restaurant-line-bot/usecase"
 	"restaurant-line-bot/functions/restaurant-line-bot/utils"
 

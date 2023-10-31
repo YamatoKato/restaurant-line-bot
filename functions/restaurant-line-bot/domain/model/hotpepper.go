@@ -122,28 +122,39 @@ const (
 
 // response APIレスポンス
 type HotpepperResponse struct {
-	Results results `json:"results"`
+	Results Results `json:"results"`
 }
 
 // results APIレスポンスの内容
-type results struct {
-	Shop []shop `json:"shop"`
+type Results struct {
+	Shops []*Shop `json:"shop"`
 }
 
 // shop レストラン一覧
-type shop struct {
-	Name       string `json:"name"`
-	Address    string `json:"address"`
-	Photo      photo  `json:"photo"`
-	URLS       urls   `json:"urls"`
-	NonSmoking string `json:"non_smoking"`
-	Budget     budget `json:"budget"`
+type Shop struct {
+	Name       string   `json:"name"`
+	Address    string   `json:"address"`
+	Photo      photo    `json:"photo"`
+	URLS       urls     `json:"urls"`
+	NonSmoking string   `json:"non_smoking"`
+	Budget     budget   `json:"budget"`
+	Genre      category `json:"genre"`
+	Access     string   `json:"access"`
+	Open       string   `json:"open"`
+	Close      string   `json:"close"`
+	Catch      string   `json:"catch"`
 }
 
 type budget struct {
 	Code    string `json:"code"`
 	Name    string `json:"name"`
 	Average string `json:"average"`
+}
+
+type category struct {
+	Code  string `json:"code"`
+	Name  string `json:"name"`
+	Catch string `json:"catch"`
 }
 
 // photo 写真URL一覧
@@ -159,4 +170,12 @@ type mobile struct {
 // urls URL一覧
 type urls struct {
 	PC string `json:"pc"`
+}
+
+type QueryParams struct {
+	Lat       string
+	Lng       string
+	GenreCode string
+	Keyword   string
+	Address   string
 }
