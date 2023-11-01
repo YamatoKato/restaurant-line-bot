@@ -1,8 +1,6 @@
 package model
 
 import (
-	"fmt"
-
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 )
 
@@ -144,125 +142,39 @@ func SetPostbackDataField(data PostbackData, fieldName string, value string) Pos
 
 	switch fieldName {
 	case "areaStr":
-		fmt.Println("areaStr:", value)
 		newData.AreaStr = value
 	case "lat":
-		fmt.Println("lat:", value)
 		newData.Lat = value
 	case "lng":
-		fmt.Println("lng:", value)
 		newData.Lng = value
 	case "genreCode":
-		fmt.Println("genreCode:", value)
 		newData.GenreCode = value
 	case "keyword":
-		fmt.Println("keyword:", value)
 		newData.Keyword = value
 	case "smoking":
-		fmt.Println("smoking:", value)
 		newData.Smoking = value
 	case "parking":
-		fmt.Println("parking:", value)
 		newData.Parking = value
 	case "pet":
-		fmt.Println("pet:", value)
 		newData.PetFriendly = value
 	case "midnight":
-		fmt.Println("midnight:", value)
 		newData.MidnightOpen = value
 	case "midnight_meal":
-		fmt.Println("midnight_meal:", value)
 		newData.MidnightMeal = value
 	case "private_room":
-		fmt.Println("private_room:", value)
 		newData.PrivateRoom = value
 	case "free_food":
-		fmt.Println("free_food:", value)
 		newData.FreeFood = value
 	case "free_drink":
-		fmt.Println("free_drink:", value)
 		newData.FreeDrink = value
 	case "budget":
-		fmt.Println("budget:", value)
 		newData.Budget = value
 	case "terrace":
-		fmt.Println("terrace:", value)
 		newData.Terrace = value
 	default:
-		fmt.Println("無効なフィールド名:", fieldName)
 	}
 
 	return newData
-}
-
-// func GetTypeByPBDPrefix(prefix string) string {
-// 	switch prefix {
-// 	case PBD_PREFIX_IDENTIFY_AREA:
-// 		return "area"
-// 	case PBD_PREFIX_IDENTIFY_GENRE:
-// 		return "genre"
-// 	case PBD_PREFIX_IDENTIFY_CONDITION:
-// 		return "condition"
-// 	case PBD_PREFIX_IDENTIFY_KEYWORD:
-// 		return "keyword"
-// 	case PBD_PREFIX_IDENTIFY_BUDGET:
-// 		return "budget"
-// 	case PBD_PREFIX_IDENTIFY_SEARCH:
-// 		return "search"
-// 	case PBD_PREFIX_IDENTIFY_CONFIRM:
-// 		return "confirm"
-// 	default:
-// 		return ""
-// 	}
-// }
-
-// 確認カード内のテキスト作成
-func CreateTextMessage(data PostbackData) string {
-	baseStr := ""
-	conditionStr := "\n\n追加した条件：\n"
-
-	if data.AreaStr != "" {
-		baseStr += "エリア：" + data.AreaStr + "\n"
-	}
-	if data.GenreCode != "" {
-		baseStr += "ジャンル：" + SearchGenreNameByCode(data.GenreCode) + "\n"
-	}
-	if data.Keyword != "" {
-		conditionStr += "キーワード：" + data.Keyword + "\n"
-	}
-	if data.Smoking != "" {
-		conditionStr += "■" + " " + SMOKING_JP + "\n"
-	}
-	if data.Parking != "" {
-		conditionStr += "■" + " " + PARKING_JP + "\n"
-	}
-	if data.PetFriendly != "" {
-		conditionStr += "■" + " " + PET_FRIENDLY_JP + "\n"
-	}
-	if data.MidnightOpen != "" {
-		conditionStr += "■" + " " + MIDNIGHT_OPEN_JP + "\n"
-	}
-	if data.MidnightMeal != "" {
-		conditionStr += "■" + " " + MIDNIGHT_MEAL_JP + "\n"
-	}
-	if data.PrivateRoom != "" {
-		conditionStr += "■" + " " + PRIVATE_ROOM_JP + "\n"
-	}
-	if data.Terrace != "" {
-		conditionStr += "■" + " " + TERRACE_JP + "\n"
-	}
-	if data.FreeDrink != "" {
-		conditionStr += "■" + " " + FREE_DRINK_JP + "\n"
-	}
-	if data.FreeFood != "" {
-		conditionStr += "■" + " " + FREE_FOOD_JP + "\n"
-	}
-
-	if conditionStr == "\n\n追加した条件：\n" {
-		return baseStr
-	}
-
-	return baseStr + conditionStr
 }
 
 func GetPrefix(input string) string {

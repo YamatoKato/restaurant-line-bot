@@ -61,6 +61,7 @@ func (interactor *SearchInteractor) GetRestaurantInfos(in searchdto.Input) (sear
 		if err := interactor.linePresenter.SetNothingHitReplyMessage(searchdtoOutput); err != nil {
 			return searchdto.Output{}, err
 		}
+		return searchdto.Output{}, nil
 	}
 
 	if err := interactor.linePresenter.SetRestaurantListReplyMessage(searchdtoOutput); err != nil {

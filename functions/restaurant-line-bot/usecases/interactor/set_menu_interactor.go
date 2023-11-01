@@ -93,7 +93,7 @@ func (interactor *SetMenuInteractor) SetConfirmMenu(in menudto.SetConfirmMenuInp
 		ButtonsTemplateData: model.ButtonsTemplateData{
 			ThumbnailImageURL: model.BT_THUMBNAIL_SET_CONFIRM_MENU,
 			Title:             model.BT_TITLE_SET_CONFIRM_MENU,
-			Text:              model.CreateTextMessage(in.PostbackData),
+			Text:              createTextMessage(&in.PostbackData),
 		},
 		PostbackActionData: model.PostbackActionData{
 			Label:       label,
@@ -212,4 +212,53 @@ func (interactor *SetMenuInteractor) SetConditionMenu(in menudto.SetConditionMen
 	}
 
 	return output, nil
+}
+
+// 確認カード内のテキスト作成
+func createTextMessage(data *model.PostbackData) string {
+	baseStr := ""
+	conditionStr := "\n\n追加した条件：\n"
+
+	if data.AreaStr != "" {
+		baseStr += "エリア：" + data.AreaStr + "\n"
+	}
+	if data.GenreCode != "" {
+		baseStr += "ジャンル：" + model.SearchGenreNameByCode(data.GenreCode) + "\n"
+	}
+	if data.Keyword != "" {
+		conditionStr += "キーワード：" + data.Keyword + "\n"
+	}
+	if data.Smoking != "" {
+		conditionStr += "■" + " " + model.SMOKING_JP + "\n"
+	}
+	if data.Parking != "" {
+		conditionStr += "■" + " " + model.PARKING_JP + "\n"
+	}
+	if data.PetFriendly != "" {
+		conditionStr += "■" + " " + model.PET_FRIENDLY_JP + "\n"
+	}
+	if data.MidnightOpen != "" {
+		conditionStr += "■" + " " + model.MIDNIGHT_OPEN_JP + "\n"
+	}
+	if data.MidnightMeal != "" {
+		conditionStr += "■" + " " + model.MIDNIGHT_MEAL_JP + "\n"
+	}
+	if data.PrivateRoom != "" {
+		conditionStr += "■" + " " + model.PRIVATE_ROOM_JP + "\n"
+	}
+	if data.Terrace != "" {
+		conditionStr += "■" + " " + model.TERRACE_JP + "\n"
+	}
+	if data.FreeDrink != "" {
+		conditionStr += "■" + " " + model.FREE_DRINK_JP + "\n"
+	}
+	if data.FreeFood != "" {
+		conditionStr += "■" + " " + model.FREE_FOOD_JP + "\n"
+	}
+
+	if conditionStr == "\n\n追加した条件：\n" {
+		return baseStr
+	}
+
+	return baseStr + conditionStr
 }

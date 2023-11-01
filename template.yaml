@@ -37,7 +37,7 @@ Resources:
         CatchAll:
           Type: Api
           Properties:
-            Path: /restaurant/api/{proxy+}
+            Path: /restaurant
             Method: POST
       Environment:
         Variables:

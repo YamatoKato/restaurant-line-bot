@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
 	"regexp"
-	"restaurant-line-bot/functions/restaurant-line-bot/domain/model"
 	"strings"
 	"unicode/utf8"
 )
@@ -45,13 +43,11 @@ func ContainsHyphen(input string) bool {
 	}
 }
 
-func CreatePostbackData(postbackData *model.PostbackData) (string, error) {
-	jsonData, err := json.Marshal(postbackData)
-	if err != nil {
-		return "", err
+func ReplaceEmptyWithUnknown(input string) string {
+	if input == "" {
+		return "不明"
 	}
-
-	return string(jsonData), nil
+	return input
 }
 
 func GetAreaStrFromLocation(input string) string {

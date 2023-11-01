@@ -70,7 +70,6 @@ func (c *LinebotController) SetConfirmMenu(e *linebot.Event, messageType string,
 		areaWording := utils.GetAreaWording(areaMessage)
 		data = model.PostbackData{
 			AreaStr: areaWording,
-			Keyword: areaWording,
 		}
 
 		if areaMessage == "" {

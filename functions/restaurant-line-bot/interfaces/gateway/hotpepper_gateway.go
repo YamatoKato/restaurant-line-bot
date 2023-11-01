@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -35,8 +34,6 @@ func (g *HotpepperGateway) GetRestaurantInfos(apiParams string) (*model.Hotpeppe
 	url := g.baseApiURL + "&" + apiParams
 	var response *model.HotpepperResponse
 
-	fmt.Println(url)
-
 	resp, err := http.Get(url)
 	if err != nil {
 		logrus.Errorf("Error getting response: %v", err)
@@ -48,9 +45,6 @@ func (g *HotpepperGateway) GetRestaurantInfos(apiParams string) (*model.Hotpeppe
 		logrus.Errorf("Error reading response body: %v", err)
 		return nil, err
 	}
-
-	// jsonでログを表示
-	logrus.Infof("Response body: %v", string(body))
 
 	if err := json.Unmarshal(body, &response); err != nil {
 		logrus.Errorf("Error unmarshaling response body: %v", err)

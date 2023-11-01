@@ -305,7 +305,7 @@ func setBody(s *model.Shop) *linebot.BoxComponent {
 		Contents: []linebot.FlexComponent{
 			&linebot.TextComponent{
 				Type:   linebot.FlexComponentTypeText,
-				Text:   s.Genre.Name,
+				Text:   utils.ReplaceEmptyWithUnknown(s.Genre.Name),
 				Margin: "3px",
 				Size:   linebot.FlexTextSizeTypeXxs,
 				Align:  linebot.FlexComponentAlignTypeCenter,
@@ -328,7 +328,7 @@ func setBody(s *model.Shop) *linebot.BoxComponent {
 		Contents: []linebot.FlexComponent{
 			&linebot.TextComponent{
 				Type:   linebot.FlexComponentTypeText,
-				Text:   s.NonSmoking,
+				Text:   utils.ReplaceEmptyWithUnknown(s.NonSmoking),
 				Margin: "3px",
 				Size:   linebot.FlexTextSizeTypeXxs,
 				Align:  linebot.FlexComponentAlignTypeCenter,
@@ -351,7 +351,7 @@ func setBody(s *model.Shop) *linebot.BoxComponent {
 		Contents: []linebot.FlexComponent{
 			&linebot.TextComponent{
 				Type:   linebot.FlexComponentTypeText,
-				Text:   s.Budget.Name,
+				Text:   utils.ReplaceEmptyWithUnknown(s.Budget.Name),
 				Margin: "3px",
 				Size:   linebot.FlexTextSizeTypeXxs,
 				Align:  linebot.FlexComponentAlignTypeCenter,
@@ -376,16 +376,16 @@ func setBody(s *model.Shop) *linebot.BoxComponent {
 	}
 
 	// アクセス - 詳細コンポーネント
-	ac := setDetail("アクセス", s.Access)
+	ac := setDetail("アクセス", utils.ReplaceEmptyWithUnknown(s.Access))
 
 	// キャッチ - 詳細コンポーネント
-	cc := setDetail("キャッチ", s.Catch+"\n"+s.Genre.Catch)
+	cc := setDetail("キャッチ", utils.ReplaceEmptyWithUnknown(s.Catch+"\n"+s.Genre.Catch))
 
 	// 時間 - 詳細コンポーネント
-	tic := setDetail("時間", s.Open)
+	tic := setDetail("時間", utils.ReplaceEmptyWithUnknown(s.Open))
 
 	// 定休日 - 詳細コンポーネント
-	clc := setDetail("定休日", s.Close)
+	clc := setDetail("定休日", utils.ReplaceEmptyWithUnknown(s.Close))
 
 	return &linebot.BoxComponent{
 		Type:    linebot.FlexComponentTypeBox,

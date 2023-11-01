@@ -122,6 +122,8 @@ func (r *Router) CatchEvents(event events.APIGatewayProxyRequest) error {
 				}
 			}
 
+			return nil
+
 		} else {
 			if err := r.lc.SetHelpMenu(we); err != nil {
 				logrus.Error(err, "router@SetHelpMenu")
@@ -138,14 +140,14 @@ func (r *Router) CatchEvents(event events.APIGatewayProxyRequest) error {
 func validateSignature(channelSecret string, signature string, body []byte) bool {
 	decoded, err := base64.StdEncoding.DecodeString(signature)
 	if err != nil {
-		fmt.Println(err, "validateSignature_base64.StdEncoding.DecodeString")
+		logrus.Error(err, "validateSignature_base64.StdEncoding.DecodeString")
 		return false
 	}
 
 	hash := hmac.New(sha256.New, []byte(channelSecret))
 	_, err = hash.Write(body)
 	if err != nil {
-		fmt.Println(err, "validateSignature_hash.Write")
+		logrus.Error(err, "validateSignature_hash.Write")
 		return false
 	}
 
