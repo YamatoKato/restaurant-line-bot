@@ -1,6 +1,9 @@
 # 飲食店レーダー
 友達追加はこちらから↓
 
+こちらの開発ブログを書きました。
+[こちら！](https://www.yamakt.blog/blog/fc3606802575)
+
 ![image](https://github.com/YamatoKato/restaurant-line-bot/assets/95395675/5886e7cd-cd81-42bc-8af1-e5dac427472c)
 
 [リンク](https://liff.line.me/1645278921-kWRPP32q/?accountId=282fsnus)
